@@ -29,35 +29,49 @@ public class SimpleThreads {
     }
   }
 
-  public static void main(String[] args) {
-    throws InterruptedException {
-      //Delay, in miliseconds before
-      //we interrupt MessageLoop
-      //thread (default one hour)
-      long patience = 100*60*60;
+  public static void main(String[] args)
+      throws InterruptedException {
+        //Delay, in milliseconds before
+        //we interrupted MessageLoop
+        //thread (default one hour).
+        long patience = 1000 * 60 * 60;
 
-      //if command line argument
-      //present, gives patience
-      //in seconds
-      if(args.length > 0){
-        try{{
-          patience = Long.parseLong(args[0])*1000;
-        }catch(NumberFormatException e){
-          System.err.println("El argumento debe ser entero");
-          System.exit(1);
+        //if command line argument
+        //present, gives patience
+        //in seconds
+        if(args.length > 0){
+          try{
+            patience = Long.parseLong(args[0]) *1000;
+          }catch(NumberFormatException e){
+            System.err.println("El argumento debe ser entero");
+            System.exit(1);
+          }
         }
+
+        threadMessage("Iniciando el hilo del ciclo de mensajes");
+        long startTime = System.currentTimeMillis();
+        Thread t = new Thread(new MessageLoop());
+        t.start();
+
+        threadMessage("Esperando que el hilo de ciclo de mensajes termine");
+        //loop until MessageLoop
+        //thread exits
+        while(t.isAlive()){
+          threadMessage("Aun esperando...");
+          //wait maximun of 1 second
+          //for MessageLoop thread
+          //to finish
+          t.join(1000);
+          if(((System.currentTimeMillis() - startTime) > patience)
+            && t.isAlive()){
+              threadMessage("Cansado de esperar!");
+              t.interrupt();
+              //Shouldn't be long now
+              //... wait indefinitely
+              t.join();
+            }
+        }
+        threadMessage("Finalmente");
       }
-
-      threadMessage("Iniciando el hilo del ciclo de mensajes");
-      long starTime = System.currentTimeMillis();
-      Thread t = new Thread(new MessageLoop());
-      t.start();
-
-      threadMessage("Esperando que el hilo del civclo de mensajes termine su ciclo");
-      //loop until MessageLoop
-      //threads exist
-      while(t.isAlive())
-    }
-  }
 
 }
